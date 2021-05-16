@@ -2,7 +2,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import FormCard from './FormCard'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 
 
@@ -14,7 +14,10 @@ const InviteForm = observer( ({server, path, inviteToken, csrfToken}) => {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
 
-
+    useEffect(() => {
+      csrfToken.updateToken()
+// eslint-disable-next-line react-hooks/exhaustive-deps
+    },[])
   
     const handleSubmit = (e) => {
       e.preventDefault();
@@ -37,7 +40,7 @@ const InviteForm = observer( ({server, path, inviteToken, csrfToken}) => {
           credentials: 'include',
           body: JSON.stringify(cred )
         })
-        .then(res => console.log(res));
+        .then(res => console.log("Invite:",res));
     };
   
     return (

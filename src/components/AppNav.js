@@ -1,38 +1,10 @@
 import Nav from 'react-bootstrap/Nav';
-import Button from 'react-bootstrap/Button'
 import Navbar from 'react-bootstrap/Navbar'
 import { Link } from 'react-router-dom';
 import { observer } from 'mobx-react-lite'
-import { useHistory } from "react-router-dom";
+import LoginLogoutButton from './LoginLogoutButton';
 
 const AppNav = observer(({ server, path, loginState, csrfToken }) => {
-  const history = useHistory();
-
-  const logout = (e) => {
-    e.preventDefault();
-    console.log('logout',loginState.isLogin);
-    if (loginState.isLogin === false) return;
-
-    loginState.clearError();
-    const api = server + path;
-    fetch(api, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Csrf-Token': csrfToken.value,
-      },
-      credentials: 'include',
-    })
-      .then(res => {
-        console.log(res);
-        if (res.status === 200) {
-          loginState.setLoginStatus(false);
-          history.push("/");
-        } else {
-          loginState.setError("unable to logout, retry");
-        }
-      });
-  };
 
   return (
     <>
@@ -50,10 +22,9 @@ const AppNav = observer(({ server, path, loginState, csrfToken }) => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mr-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/login">Login</Nav.Link>
-            <Button variant="primary" onClick={logout}>Logout</Button>
+            <LoginLogoutButton variant="primary" server={server} path={path} loginState={loginState} csrfToken={csrfToken}/>
           </Nav>
-        </Navbar.Collapse>
+        </Navbar.Collapse>  
       </Navbar>
     </>
   )
