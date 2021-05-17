@@ -1,7 +1,7 @@
 import './App.css';
 import Login from './components/Login';
 import LoginState from './model/login';
-import { createCsrfToken , CsrfToken } from './model/csrf';
+import { createCsrfToken } from './model/csrf';
 import Home from './components/Home';
 import Invite from './components/Invite';
 import AppNav from './components/AppNav';
@@ -13,32 +13,16 @@ import {
 } from "react-router-dom";
 
 import './App.css';
-import { onSnapshot ,applySnapshot, getSnapshot} from "mobx-state-tree";
+import { onSnapshot } from "mobx-state-tree";
 
 const authServer = 'https://localhost:8443'
 const csrfToken  = createCsrfToken(authServer);
-
-if (localStorage.getItem("csrfToken")) {
-  const json = JSON.parse(localStorage.getItem("csrfToken"));
-  if(CsrfToken.is(json)) 
-    applySnapshot(csrfToken,json);
-}
+const loginState = LoginState.create();
 
 onSnapshot(csrfToken, snapshot => {
   console.log("onSnapshot",snapshot)
   localStorage.setItem("csrfToken",JSON.stringify(snapshot))
 });
-
-setInterval(() => {
-  console.log("App::setInterval",csrfToken.isExpired(), csrfToken.isLogin(), getSnapshot(csrfToken))
-  if (csrfToken.isExpired()) {
-    csrfToken.updateToken()
-  }
-},60000)
-
-const loginState = LoginState.create();
-
-
 
 const App = () => (
   <>

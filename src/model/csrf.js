@@ -1,24 +1,22 @@
-import { types } from "mobx-state-tree";
+import { types , applySnapshot} from "mobx-state-tree";
 
 export const CsrfToken = types
     .model("CsrfToken",{
         value: types.optional(types.string, ""),
-        //oldValue: types.optional(types.string, ""),
         iframeKey: types.optional(types.integer, 0),
         updatePending: types.optional(types.boolean,true),
-        //token_expiry: types.optional(types.integer, 0),
-        //session_expiry: types.optional(types.integer, 0),
     })
     .views(self => ({
-        isExpired() {
+        willExpireIn(seconds = 30) {
+            if (self.iframeKey === null) console.log("never executes, just forces a view update after action updateToken")
             if (self.value === '') return true;
             // CSRF token has a unix epoch expiration value appended
             const token_expiry = parseInt(self.value.split('_')[1]);
-            // is token expired?
-            return ((token_expiry * 1000) < Date.now())
+            // will token expire?
+            return ((token_expiry * 1000) < (Date.now() + (seconds * 1000)))
         },
         isLogin() {
-            // is session expired?
+            if (self.iframeKey === null) console.log("never executes, just forces a view update after action updateToken")
             if (self.value === '') return false;
             // CSRF token has a unix epoch session expiration value appended
             const session_expiry = parseInt(self.value.split('_')[2]);
@@ -38,21 +36,16 @@ export const CsrfToken = types
                     self.updatePending = false;
                 }
             }
-            //if (value === '') return;
-            //if (value !== self.oldValue) {
-                //self.oldValue = self.value;
-                //self.value = value
-                // CSRF token has a unix epoch expiration value appended
-                //self.token_expiry = parseInt(self.value.split('_')[1]);
-                // CSRF token has a unix epoch session expiration value appended
-                //self.session_expiry = parseInt(self.value.split('_')[2]);
-            //}
         },
         updateToken() {
-            //if (self.updatePending === true) return;
-            self.iframeKey += 1;
+            // trigger the reload of the CSRF fetcher iframe
+            if (self.iframeKey >= 999) {
+                self.iframeKey = 0
+            } else {
+                self.iframeKey += 1;
+            }
+            // updatePending helps troubleshooting, but is never used
             self.updatePending = true;
-            //self.value = '';
         },
     }));
 
@@ -63,7 +56,21 @@ export const createCsrfToken = (authServer) => {
             return;
         csrfToken.setValue(event.data);
     }
+    // Listen on csrf fetcher events
     window.addEventListener("message", handler);
+    // Restore csrf token from local storage
+    if (localStorage.getItem("csrfToken")) {
+        const json = JSON.parse(localStorage.getItem("csrfToken"));
+        if(CsrfToken.is(json)) 
+          applySnapshot(csrfToken,json);
+    }
+    // Check whether csrf token needs a refresh
+    setInterval(() => {
+        //console.log("App::setInterval",csrfToken.willExpireIn(), csrfToken.isLogin(), getSnapshot(csrfToken))
+        if (csrfToken.willExpireIn()) {
+          csrfToken.updateToken()
+        }
+      },60000)
     return csrfToken;
 }
 

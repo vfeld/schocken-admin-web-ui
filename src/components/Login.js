@@ -3,7 +3,7 @@ import Alert from 'react-bootstrap/Alert'
 import Form from 'react-bootstrap/Form';
 import FormCard from './FormCard'
 import { observer } from 'mobx-react-lite'
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useHistory } from "react-router-dom";
 
 const LoginForm = observer(({ server, path, loginState, csrfToken }) => {
@@ -12,11 +12,6 @@ const LoginForm = observer(({ server, path, loginState, csrfToken }) => {
   const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (csrfToken.isExpired())
-      csrfToken.updateToken()
-  })
 
   const handleSubmit = (e) => {
     e.preventDefault();
