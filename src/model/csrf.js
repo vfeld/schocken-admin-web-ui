@@ -8,7 +8,8 @@ export const CsrfToken = types
     })
     .views(self => ({
         willExpireIn(seconds = 30) {
-            if (self.iframeKey === null) console.log("never executes, just forces a view update after action updateToken")
+            if (self.iframeKey === null) 
+                console.log("do not remove me, this forces a view update after action updateToken (iframeKey is set in this action)")
             if (self.value === '') return true;
             // CSRF token has a unix epoch expiration value appended
             const token_expiry = parseInt(self.value.split('_')[1]);
@@ -16,7 +17,8 @@ export const CsrfToken = types
             return ((token_expiry * 1000) < (Date.now() + (seconds * 1000)))
         },
         isLogin() {
-            if (self.iframeKey === null) console.log("never executes, just forces a view update after action updateToken")
+            if (self.iframeKey === null) 
+                console.log("do not remove me, this forces a view update after action updateToken (iframeKey is set in this action)")
             if (self.value === '') return false;
             // CSRF token has a unix epoch session expiration value appended
             const session_expiry = parseInt(self.value.split('_')[2]);

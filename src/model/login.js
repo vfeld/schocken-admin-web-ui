@@ -55,7 +55,7 @@ const LoginState = types
         return true;
       } else {
         console.log("... logout was not successfull")
-        return self.isLogin;
+        return false;
       }
     })
   }));
